@@ -1,4 +1,4 @@
-For reproducing the paper [Learning Disentangled Representations of Timbre and Pitch for Musical Instrument Sounds Using Gaussian Mixture Variational Autoencoders](https://arxiv.org/abs/1906.08152?fbclid=IwAR3yBPx71nPt0uO6GjVqdJxQxzStiyz3osf6mFUCW_cMIarwykZM5_tfUpU).
+For reproducing the paper [Exploratory Study on Perceptual Spaces of the Singing Voice](https://arxiv.org/abs/1906.08152?fbclid=tester3000abc).
 
 The repo is based on the (old) [project template](https://github.com/victoresque/pytorch-template).
 
