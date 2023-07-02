@@ -1,3 +1,5 @@
 .ipynb_checkpoints/
 *distributions/
 mds_plots/
+dissim_matrices/
+*.csv
