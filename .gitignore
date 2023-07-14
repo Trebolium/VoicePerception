@@ -1,4 +1,7 @@
 .ipynb_checkpoints/
+__pycache__/
+.DS_Store
+this_venv/
 correlations/
 *distributions/
 mds_plots/
