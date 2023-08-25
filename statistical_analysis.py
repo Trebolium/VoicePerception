@@ -7,7 +7,7 @@ import pdb
 import warnings
 
 from cliffs_delta import cliffs_delta
-from scipy.stats import chi2, rankdata, pearsonr, kendalltau, spearmanr, norm, skew, shapiro, kstest
+from scipy.stats import chi2, rankdata, pearsonr, kendalltau, spearmanr, norm, skew, shapiro, kstest, linregress
 
 from utils import diagonal_array_handling
 
@@ -243,6 +243,9 @@ def array_column_correlations(array, feat_names, profile_label_dict, sig_thresh,
             
         return feats_name, feats
     
+    def regression_line(x):
+        return slope * x + intercept
+    
     
     # setup variables
     num_feats = array.shape[1]
@@ -260,12 +263,12 @@ def array_column_correlations(array, feat_names, profile_label_dict, sig_thresh,
             j_feats_name, j_feats = get_array_feats(j, array, feat_names)
                 
             if test_type=='pearsonr':
-                r_val, p_val = pearsonr(i_feats, j_feats)
+                correlation_coefficient, p_val = pearsonr(i_feats, j_feats)
             elif test_type=='kendalltau':
-                r_val, p_val = kendalltau(i_feats, j_feats)
+                correlation_coefficient, p_val = kendalltau(i_feats, j_feats)
             elif test_type=='spearmanr':
-                r_val, p_val = spearmanr(i_feats, j_feats)
-#             print(f'corr: {i_feats_name} x {j_feats_name}:', r_val, p_val)
+                correlation_coefficient, p_val = spearmanr(i_feats, j_feats)
+#             print(f'corr: {i_feats_name} x {j_feats_name}:', correlation_coefficient, p_val)
                 
             # add result to list if p_val is low enough and conditions haven't been compared
             if p_val <= sig_thresh:
@@ -277,7 +280,7 @@ def array_column_correlations(array, feat_names, profile_label_dict, sig_thresh,
                     continue
                     
                 else:
-                    entry = (i_feats_name.split(' ')[0], j_feats_name.split(' ')[0], round(float(r_val), 2), float(p_val))
+                    entry = (i_feats_name.split(' ')[0], j_feats_name.split(' ')[0], round(float(correlation_coefficient), 2), float(p_val))
                     correlation_dict[f'{i_feats_name} x {j_feats_name}'] = entry
                     correlation_list.append(entry)
                     print(entry)
@@ -292,6 +295,7 @@ def array_column_correlations(array, feat_names, profile_label_dict, sig_thresh,
                         
                         if num_cats<5:
                             print('using box plot')
+                            subsubdir = 'corr_box'
                             # must be the ordinal data, so make box plots
                             figure = plt.figure(figsize =(20, 10))  
                             
@@ -306,12 +310,27 @@ def array_column_correlations(array, feat_names, profile_label_dict, sig_thresh,
                                 plt.xlabel(i_feats_name, fontsize=18)
                                 plt.ylabel(j_feats_name, fontsize=18)
                         else:
+                            subsubdir = 'corr_scat'
+                            slope, intercept, r_value, p_value, std_err = linregress(i_feats, j_feats)
+                            
                             x_interval = round((x_max-x_min)/10, 2)
-                            plt.yticks(np.arange(y_min, y_max, y_interval))
-                            plt.xticks(np.arange(x_min, x_max, x_interval))
-                            plt.scatter(i_feats, j_feats)
+                            
+                            if 'MSI' in i_feats_name:
+                                plt.xticks(np.arange(49,96,5))
+                            else:
+                                plt.xticks(np.linspace(0,1,11))
+                                
+                            if 'MSI' in j_feats_name:
+                                plt.yticks(np.arange(49,96,5))
+                            else:
+                                plt.yticks(np.linspace(0,1,11))
+                            
+                            plt.scatter(i_feats, j_feats, label=f'Correlation Coefficient: {correlation_coefficient:.2f}')
+                            plt.plot(i_feats, regression_line(i_feats), color='red', label=f'Regression Line (R-squared = {r_value**2:.2f})')
                             plt.ylabel(j_feats_name)
                             plt.xlabel(i_feats_name)
+                            plt.legend()
+                        
                         title = f'{test_type}_correlation'
 #                         # plt.title(title)
                         
@@ -319,7 +338,7 @@ def array_column_correlations(array, feat_names, profile_label_dict, sig_thresh,
                             subdir = 'correlations'
                             if not os.path.exists(subdir):
                                 os.mkdir(subdir)
-                            plt.savefig(os.path.join(subdir, f'{j_feats_name} x {i_feats_name}_' +title))
+                            plt.savefig(os.path.join(subdir, subsubdir, f'{j_feats_name} x {i_feats_name}_' +title))
                             
                         plt.show()
                         plt.close()

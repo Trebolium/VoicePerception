@@ -167,7 +167,7 @@ def find_best_k_values(h5, indices, condition_name, k, cluster_algorithm, score_
         plt.bar(cluster_solution_range, best_k_hist)
         # plt.title(title)
         plt.xticks(k_range)
-        plt.xlabel('Dimensions for k')
+        plt.xlabel('Number of clusters (k)')
         plt.tight_layout()
         if save_plot:
             subdir = 'cluster_score_distributions'
@@ -251,6 +251,7 @@ def find_best_k_values(h5, indices, condition_name, k, cluster_algorithm, score_
         # turn best_k_from_silhouettes into bar graph suitable data
         # os.makedirs(f'{cluster_algorithm}_{score_type}_distributions/', exist_ok=True)
         title = f'{condition_name}_{cluster_algorithm}_{score_type}_distributions'
+        plot_title = f'Best {score_type} for {cluster_algorithm} solutions'
         best_k_hist = []
         cluster_solution_range = range(int(np.min(best_k_from_scores)),int(np.max(best_k_from_scores)+1))
         for cluster_num in cluster_solution_range:
@@ -258,9 +259,10 @@ def find_best_k_values(h5, indices, condition_name, k, cluster_algorithm, score_
             best_k_hist.append(total_sum_per_cluster_num)
             
         plt.bar(cluster_solution_range, best_k_hist)
-        # plt.title(title)
+        plt.title(plot_title)
         plt.xticks(k_range)
-        plt.xlabel('Dimensions for k')
+        plt.xlabel('Number of clusters (k)')
+        plt.ylabel('Number of best scores')
         plt.tight_layout()
         if save_plot:
             subdir = 'cluster_score_distributions'
